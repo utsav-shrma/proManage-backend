@@ -29,7 +29,7 @@ authRouter.post("/register", async (req, res) => {
     let newUser = new User({ name, email, password: hashedPassword });
     await newUser.save();
     let token = await jwt.sign({ userId: newUser._id }, jwtKey);
-    res.status(200).json({ name: isExistingUser.name,jwt: token });
+    res.status(200).json({ name: newUser.name,jwt: token });
   } catch (error) {
     console.log(error);
   }
