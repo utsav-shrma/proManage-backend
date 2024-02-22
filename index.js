@@ -4,7 +4,10 @@ const app = express();
 const port = process.env.PORT;
 const mongodb=require('./config/mongodb');
 const authRouter=require('./router/auth');
+var cors = require('cors')
 
+
+app.use(cors()) 
 app.use(express.json());
 app.use(authRouter);
 
