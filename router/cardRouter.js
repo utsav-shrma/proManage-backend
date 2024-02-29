@@ -77,7 +77,7 @@ cardRouter.put("/:id", async (req, res) => {
     });
 
     
-   await Card.updateOne({ _id: id }, {$set:{
+   let response=await Card.updateOne({ _id: id }, {$set:{
         title,
       tasks:newTasks,
       dueDate,
@@ -86,6 +86,10 @@ cardRouter.put("/:id", async (req, res) => {
       priority,
       userId,
     }});
+
+    if (response.modifiedCount === 0) {
+        return res.status(404).json({error:"card does not exist"});
+      }
 
     return res.status(200).json({ message: "Card Updated successfully" });
   } catch (error) {
@@ -98,8 +102,10 @@ cardRouter.put("/:id", async (req, res) => {
 cardRouter.delete("/:id",async (req, res) => {
   const { id } = req.params;
   try {
-    await Card.deleteOne({ _id: id });
-    
+    let response=await Card.deleteOne({ _id: id });
+    if (response.deletedCount  === 0) {
+        return res.status(404).json({error:"card does not exist"});
+      }
     return res.status(200).json({ message: "success" });
   } catch (error) {
     console.log(error);
@@ -131,11 +137,14 @@ cardRouter.patch("/task/:task",async (req, res) => {
     try {
       
 
-        await Card.updateOne(
+        let response=await Card.updateOne(
             {'tasks._id':taskId},
             { $set: { 'tasks.$.isChecked':true } }
           );
 
+          if (response.modifiedCount === 0) {
+            return res.status(404).json({error:"task does not exist"});
+          }
         
       res.status(200).json({ message: "success" });
     } catch (error) {
