@@ -35,11 +35,7 @@ authRouter.post("/register", async (req, res) => {
   }
 });
 
-//create login
-//install thunderclient
-//create job schema and create job api
-//add auth middle ware
-//why bearer
+
 
 authRouter.post("/login", async (req, res) => {
   try {
