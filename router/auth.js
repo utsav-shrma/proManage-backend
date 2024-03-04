@@ -90,7 +90,7 @@ authRouter.patch("/update/password", authMiddleware, async (req, res) => {
     );
 
     if (!isCorrectPassword) {
-      return res.status(401).json({ errorMessage: "Invalid Credentials" });
+      return res.status(401).json({ error: "Invalid Credentials" });
     }
 
     let newHashedPassword = await bcrypt.hash(newPassword, 10);
@@ -110,7 +110,7 @@ authRouter.patch("/update/name", authMiddleware, async (req, res) => {
   try{
     let {name}=req.body;
     if(!name){
-      return res.status(400).json({ message: "bad request" });
+      return res.status(400).json({ error: "bad request" });
     }
 
     await User.updateOne(

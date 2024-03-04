@@ -9,9 +9,12 @@ cardRouter.get("/", async (req, res) => {
   try {
     let userId = req.body.userId;
  
-    let cards = await Card.find({ userId: userId });
+    let backlog = await Card.find({ userId: userId ,status:"backlog" });
+    let inProgress = await Card.find({ userId: userId ,status:"inProgress" });
+    let toDo = await Card.find({ userId: userId ,status:"toDo" });
+    let done = await Card.find({ userId: userId ,status:"done" });
 
-    res.status(200).json(cards);
+    res.status(200).json({backlog,inProgress,toDo,done});
   } catch (error) {
     console.log(console.log(error));
   }
