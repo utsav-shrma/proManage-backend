@@ -132,17 +132,34 @@ cardRouter.patch("/share/:id",async (req, res) => {
   }
 });
 
+//update status
+cardRouter.patch("/status/:id",async (req, res) => {
+    const { id } = req.params;
+    let {status}=req.body;
+    try {
+      let response=await Card.findOneAndUpdate({ _id: id }, { $set: { status } });
+      if(!response){
+          return res.status(404).json({ error: "obj not found" });
+      }
+   
+      res.status(200).json({ message: "success" });
+    } catch (error) {
+      console.log(error);
+      res.status(400).json({ error: "error occured" });
+    }
+  });
 
 //add tick
 cardRouter.patch("/task/:task",async (req, res) => {
-   
+    
+    let {isChecked}= req.body;
     let taskId = req.params.task;
     try {
       
 
         let response=await Card.updateOne(
             {'tasks._id':taskId},
-            { $set: { 'tasks.$.isChecked':true } }
+            { $set: { 'tasks.$.isChecked':isChecked } }
           );
 
           if (response.modifiedCount === 0) {
