@@ -5,13 +5,15 @@ const port = process.env.PORT;
 const mongodb=require('./config/mongodb');
 const authRouter=require('./router/auth');
 const cardRouter=require('./router/cardRouter');
+const cardPublicRouter=require('./router/cardPublicRouter');
 var cors = require('cors')
 const authMiddleware = require('./middleware/auth');
 
 
 app.use(cors()) 
 app.use(express.json());
-app.use(authRouter);
+app.use("/share",authRouter);
+app.use(cardPublicRouter);
 app.use("/card",authMiddleware,cardRouter);
 
 // app.get("/", (req, res) => res.send("Hello world"));
