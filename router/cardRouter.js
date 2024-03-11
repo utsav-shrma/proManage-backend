@@ -1,24 +1,6 @@
 const express = require("express");
 const cardRouter = express.Router();
-
-const {Card,Task} = require("../models/card");
-
-
-//get all  .
-cardRouter.get("/", async (req, res) => {
-  try {
-    let userId = req.body.userId;
- 
-    let backlog = await Card.find({ userId: userId ,status:"backlog" });
-    let inProgress = await Card.find({ userId: userId ,status:"inProgress" });
-    let toDo = await Card.find({ userId: userId ,status:"toDo" });
-    let done = await Card.find({ userId: userId ,status:"done" });
-
-    res.status(200).json({backlog,inProgress,toDo,done});
-  } catch (error) {
-    console.log(console.log(error));
-  }
-});
+const { Card, Task } = require("../models/card");
 
 //create
 cardRouter.post("/", async (req, res) => {
@@ -42,7 +24,7 @@ cardRouter.post("/", async (req, res) => {
 
     let newCard = new Card({
       title,
-      tasks:newTasks,
+      tasks: newTasks,
       dueDate,
       isPublic,
       status,
@@ -79,20 +61,24 @@ cardRouter.put("/:id", async (req, res) => {
       newTasks.push(newTask);
     });
 
-    
-   let response=await Card.updateOne({ _id: id }, {$set:{
-        title,
-      tasks:newTasks,
-      dueDate,
-      isPublic,
-      status,
-      priority,
-      userId,
-    }});
+    let response = await Card.updateOne(
+      { _id: id },
+      {
+        $set: {
+          title,
+          tasks: newTasks,
+          dueDate,
+          isPublic,
+          status,
+          priority,
+          userId,
+        },
+      }
+    );
 
     if (response.modifiedCount === 0) {
-        return res.status(404).json({error:"card does not exist"});
-      }
+      return res.status(404).json({ error: "card does not exist" });
+    }
 
     return res.status(200).json({ message: "Card Updated successfully" });
   } catch (error) {
@@ -101,17 +87,14 @@ cardRouter.put("/:id", async (req, res) => {
   }
 });
 
-
-
-
 //delete
-cardRouter.delete("/:id",async (req, res) => {
+cardRouter.delete("/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    let response=await Card.deleteOne({ _id: id });
-    if (response.deletedCount  === 0) {
-        return res.status(404).json({error:"card does not exist"});
-      }
+    let response = await Card.deleteOne({ _id: id });
+    if (response.deletedCount === 0) {
+      return res.status(404).json({ error: "card does not exist" });
+    }
     return res.status(200).json({ message: "success" });
   } catch (error) {
     console.log(error);
@@ -120,14 +103,17 @@ cardRouter.delete("/:id",async (req, res) => {
 });
 
 //share
-cardRouter.patch("/share/:id",async (req, res) => {
+cardRouter.patch("/share/:id", async (req, res) => {
   const { id } = req.params;
   try {
-    let response=await Card.findOneAndUpdate({ _id: id }, { $set: { isPublic: true } });
-    if(!response){
-        return res.status(404).json({ error: "obj not found" });
+    let response = await Card.findOneAndUpdate(
+      { _id: id },
+      { $set: { isPublic: true } }
+    );
+    if (!response) {
+      return res.status(404).json({ error: "obj not found" });
     }
- 
+
     res.status(200).json({ message: "success" });
   } catch (error) {
     console.log(error);
@@ -136,92 +122,131 @@ cardRouter.patch("/share/:id",async (req, res) => {
 });
 
 //update status
-cardRouter.patch("/status/:id",async (req, res) => {
-    const { id } = req.params;
-    let {status}=req.body;
-    try {
-      let response=await Card.findOneAndUpdate({ _id: id }, { $set: { status } });
-      if(!response){
-          return res.status(404).json({ error: "obj not found" });
-      }
-   
-      res.status(200).json({ message: "success" });
-    } catch (error) {
-      console.log(error);
-      res.status(400).json({ error: "error occured" });
-    }
-  });
-
-//add tick
-cardRouter.patch("/task/:task",async (req, res) => {
-    
-    let {isChecked}= req.body;
-    let taskId = req.params.task;
-    try {
-      
-
-        let response=await Card.updateOne(
-            {'tasks._id':taskId},
-            { $set: { 'tasks.$.isChecked':isChecked } }
-          );
-
-          if (response.modifiedCount === 0) {
-            return res.status(404).json({error:"task does not exist"});
-          }
-        
-      res.status(200).json({ message: "success" });
-    } catch (error) {
-      console.log(error);
-      res.status(400).json({ error: "error occured" });
-    }
-  });
-  
-
-//analytics
-cardRouter.get("/analytics",async (req, res) => {
-  let userId = req.body.userId;
-  console.log(userId);
+cardRouter.patch("/status/:id", async (req, res) => {
+  const { id } = req.params;
+  let { status } = req.body;
   try {
-    let cards = await Card.find({ userId: userId });
-    console.log(cards);
-    let backlog = cards.filter((card) => card.status === "backlog").length;
-    let toDo = cards.filter((card) => card.status === "toDo").length;
-    let inProgress = cards.filter((card) => card.status === "inProgress").length;
-    let completed = cards.filter((card) => card.status === "done").length;
-    let low = cards.filter((card) => card.priority === "low").length;
-    let medium = cards.filter((card) => card.priority === "medium").length;
-    let high = cards.filter((card) => card.priority === "high").length;
-    let dueDate = cards.filter((card) => 
-    card.dueDate !== null && card.dueDate !== undefined).length;
+    let response = await Card.findOneAndUpdate(
+      { _id: id },
+      { $set: { status } }
+    );
+    if (!response) {
+      return res.status(404).json({ error: "obj not found" });
+    }
 
-    return res.status(200).json({
-        backlog,toDo,inProgress,completed,low,medium,high,dueDate
-    });
-
-
+    res.status(200).json({ message: "success" });
   } catch (error) {
     console.log(error);
     res.status(400).json({ error: "error occured" });
   }
 });
 
-//get card by id
-cardRouter.get("/:id",async (req, res) => {
-    const { id } = req.params;
-    try {
-      let response=await Card.findOne({ _id: id });
-      if (!response) {
-          return res.status(404).json({error:"card does not exist"});
-        }
+//add tick
+cardRouter.patch("/task/:task", async (req, res) => {
+  let { isChecked } = req.body;
+  let taskId = req.params.task;
+  try {
+    let response = await Card.updateOne(
+      { "tasks._id": taskId },
+      { $set: { "tasks.$.isChecked": isChecked } }
+    );
 
-    // if(!response.isPublic){
-    //     return res.status(401).json({error:"unauthorized access"});
-    // }
-      return res.status(200).json(response);
-    } catch (error) {
-      console.log(error);
-      return res.status(400).json({ error: "error occured" });
+    if (response.modifiedCount === 0) {
+      return res.status(404).json({ error: "task does not exist" });
     }
-  });
+
+    res.status(200).json({ message: "success" });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ error: "error occured" });
+  }
+});
+
+//analytics
+cardRouter.get("/analytics", async (req, res) => {
+  let userId = req.body.userId;
+  console.log(userId);
+  try {
+    let cards = await Card.find({ userId: userId });
+    let backlog = cards.filter((card) => card.status === "backlog").length;
+    let toDo = cards.filter((card) => card.status === "toDo").length;
+    let inProgress = cards.filter(
+      (card) => card.status === "inProgress"
+    ).length;
+    let completed = cards.filter((card) => card.status === "done").length;
+    let low = cards.filter((card) => card.priority === "low").length;
+    let medium = cards.filter((card) => card.priority === "medium").length;
+    let high = cards.filter((card) => card.priority === "high").length;
+    let dueDate = cards.filter(
+      (card) => card.dueDate !== null && card.dueDate !== undefined
+    ).length;
+
+    return res.status(200).json({
+      backlog,
+      toDo,
+      inProgress,
+      completed,
+      low,
+      medium,
+      high,
+      dueDate,
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({ error: "error occured" });
+  }
+});
+
+//get all  .
+cardRouter.get("/:duration?", async (req, res) => {
+  let userId = req.body.userId;
+  let {duration}=req.params;
+
+  let currDate=new Date();
+  let today=new Date(currDate).setHours(0, 0, 0, 0);
+  let lastWeek=new Date().setDate(currDate.getDate() - 7);
+  let lastMonth=new Date(currDate).setDate(currDate.getDate() - 30);
+
+  let query={ userId: userId , createdAt:{$gte:lastWeek}};  //default last week
+
+  if(duration==="today"){
+    query={ userId: userId  , createdAt:{$gte:today,$lte:currDate}}; 
+  }
+  if(duration==="lastMonth"){
+    query={ userId: userId  , createdAt:{$gte:lastMonth}}; 
+  }
+
+  try {
+    
+    let cards = await Card.find(query);
+    let backlog = cards.filter((card) => card.status === "backlog");
+    let toDo = cards.filter((card) => card.status === "toDo");
+    let inProgress = cards.filter((card) => card.status === "inProgress");
+    let done = cards.filter((card) => card.status === "done");
+    res.status(200).json({ backlog, inProgress, toDo, done });
+  } catch (error) {
+    console.log(console.log(error));
+  }
+});
+
+//get card by id
+cardRouter.get("/id/:id", async (req, res) => {
+  const { id } = req.params;
+  try {
+    let response = await Card.findOne({ _id: id });
+    if (!response) {
+      return res.status(404).json({ error: "card does not exist" });
+    }
+
+    if(!response.isPublic){
+        return res.status(401).json({error:"unauthorized access"});
+    }
+
+    return res.status(200).json(response);
+  } catch (error) {
+    console.log(error);
+    return res.status(400).json({ error: "error occured" });
+  }
+});
 
 module.exports = cardRouter;

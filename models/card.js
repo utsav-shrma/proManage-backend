@@ -46,6 +46,10 @@ const cardSchema = new Schema({
     type:mongoose.Types.ObjectId,
     required:true,
   },
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+  },
 
 
 });
