@@ -12,11 +12,9 @@ const authMiddleware = require('./middleware/auth');
 
 app.use(cors()) 
 app.use(express.json());
-app.use("/share",authRouter);
-app.use(cardPublicRouter);
+app.use(authRouter);
+app.use("/share",cardPublicRouter);
 app.use("/card",authMiddleware,cardRouter);
-
-// app.get("/", (req, res) => res.send("Hello world"));
 
 app.get("/health",(req,res)=>res.json({
     service:"pro manage server",
